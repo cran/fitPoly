@@ -1,0 +1,15 @@
+7e0c56029e6e32128e3613b43eeed208 *DESCRIPTION
+94e27c72d8e3c47d548962afdb2de4b3 *NAMESPACE
+6616ab74fc7fb5878ebb26c3ca2a9755 *R/fitPoly.r
+051fabf14054d299151f7696e12aba3f *data/fitPoly_data.RData
+d90c27be51339f0a974813d8c21da375 *man/CodomMarker.Rd
+1f514da89bd575e1f2258d1fe312f577 *man/convertStartmeans.Rd
+635fd8b10a33cc1d6227d973064aa540 *man/fitOneMarker.Rd
+7d352aff9679e9d3d6b613c17d5835e1 *man/fitPoly.Rd
+a8b5df297804f0e69970d67769a0aa98 *man/fitPoly_data.Rd
+12ad8a3c6b894abdaa6dd64274070c7a *man/saveMarkerModels.Rd
+b23d01428c2e44ab04ed9e2e2c828904 *tests/testdata/SNP5815.RData
+e160325e44baa4ee98b5b9b0152c041a *tests/testdata/smalldat.RData
+fab438387806fbc646e1bb06df81a310 *tests/testthat/test_1_CodomMarker.R
+3e6056b304c3a3a1d5145813c5de8ce6 *tests/testthat/test_2_fitOneMarker.R
+714b766ed457910d64c221231a3630f1 *tests/testthat/test_3_saveMarkerModels.R
