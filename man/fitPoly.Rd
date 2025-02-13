@@ -2,8 +2,8 @@
 % Please edit documentation in R/fitPoly.r
 \docType{package}
 \name{fitPoly}
-\alias{fitPoly}
 \alias{fitPoly-package}
+\alias{fitPoly}
 \title{fitPoly: a package for assigning dosage scores based on SNP array data}
 \description{
 fitPoly (an evolved version of package fitTetra) fits mixture models to

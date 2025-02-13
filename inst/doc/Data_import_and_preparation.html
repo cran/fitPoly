@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Roeland E. Voorrips" />
+<meta name="author" content="Alejandro Therese Navarro" />
+
+<meta name="date" content="2025-02-11" />
+
+<title>Data import and preparation</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Data import and preparation</h1>
+<h4 class="author">Roeland E. Voorrips</h4>
+<h4 class="author">Alejandro Therese Navarro</h4>
+<h4 class="date">2025-02-11</h4>
+
+
+
+<p>FitPoly contains several functions to import from SNP array software,
+perform selections based on signal intensity and prepare input data for
+genotyping. The package offers more functions than shown here, and the
+functions we use have additional parameters; check the help for extra
+information.</p>
+<p>Load the package and set the working directory to the data
+directory:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(fitPoly)</span></code></pre></div>
+<div id="exercise-1-extract-data-from-snp-array" class="section level2">
+<h2>Exercise 1: extract data from SNP array</h2>
+<p>We cover here the cases for Illumina Infinium and GoldenGate arrays
+and for Affymetrix Axiom arrays. The aim of this step is to get the data
+into a uniform format, such that the further steps are not dependent on
+the source of the data (array platform).</p>
+<div id="illumina" class="section level3">
+<h3>Illumina</h3>
+<p>The data from Illumina arrays are processed with Illumina’s
+GenomeStudio software. This software can export a
+<code>Full Data Table.txt</code> file, which is a tab-separated text
+file (i.e. columns in this file are separated by Tab stops). In this
+file format every row corresponds to a marker. The first columns contain
+general data for the marker including its name; next for each sample
+there are a few columns. For our purposes we need the columns X and Y
+for each sample. These are not exported by default; in order to export
+them, within GenomeStudio we use the Column Chooser button to include
+them in the output. All other sample columns besides X and Y are not
+needed but are tolerated; however since they increase the file size and
+memory load it is better to omit them when exporting from
+GenomeStudio.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co"># show part of a GenomeStudio FullDataTable file (only some relevant columns):</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>fname <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;FullDataTable.txt&quot;</span>, <span class="at">package=</span><span class="st">&quot;fitPoly&quot;</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">readDatfile</span>(fname, <span class="at">check.names=</span><span class="cn">FALSE</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>dat[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">15</span>,<span class="dv">16</span>, <span class="dv">21</span>,<span class="dv">22</span>, <span class="dv">27</span>,<span class="dv">28</span>)]</span></code></pre></div>
+<pre><code>##      Name 101765-0001.X 101765-0001.Y 101765-0002.X 101765-0002.Y 101765-0003.X 101765-0003.Y
+## 1 SNP0001    0.10170589     0.7760399    0.10211141     0.7885740    0.35890719     0.7804398
+## 2 SNP0002    0.04271171     1.3020643    0.04893748     1.2564085    0.02508135     1.1183847
+## 3 SNP0003    0.01710911     0.9452760    0.02105922     0.8730388    0.02211778     0.8874161</code></pre>
+<p>In case you want to see the <code>FullDataTable.txt</code> file
+itself, you can find it in the extdata subdirectory of the main package
+directory.</p>
+</div>
+<div id="affymetrix" class="section level3">
+<h3>Affymetrix</h3>
+<p>The data from Affymetrix Axiom arrays are processed with the
+Affymetrix Power Tools (APT) or the Genotyping Console software. After
+initial quality control steps all passing samples and all SNPs are
+processed by the program “apt probeset genotype”. If the option
+–summaries is included (as is normally the case) a file
+<code>AxiomGT1.summary.txt</code> file is produced. Like the
+GenomeStudio file, this is a tab-separated text file with the markers in
+rows and the samples in columns. There are also differences; most
+importantly, instead of having columns X and Y for each sample, we now
+have one column per sample but rows A and B for each marker. Also the
+files start with several hundred lines of text, and the last few
+thousand rows contain quality control (DQC) markers. Also the sample
+names all have “.CEL” appended to them.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># show part of an Affymetrix AxiomGT1.summary.txt file:</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>fname <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;AxiomGT1.summary.txt&quot;</span>, <span class="at">package=</span><span class="st">&quot;fitPoly&quot;</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">readDatfile</span>(fname, <span class="at">comment.char=</span><span class="st">&quot;#&quot;</span>, <span class="at">check.names=</span><span class="cn">FALSE</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>dat[<span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>]</span></code></pre></div>
+<pre><code>##     probeset_id 814-379_A03.CEL 814-379_A04.CEL 814-379_A05.CEL
+## 1 AX-86752740-A        532.8074       1089.7257        856.1627
+## 2 AX-86752740-B        606.8601        726.3137        647.0679
+## 3 AX-86752741-A       1596.1018       2228.1368       1820.3040
+## 4 AX-86752741-B        871.0347        486.4657        877.3148
+## 5 AX-86752742-A       2365.1000       2560.8275       2511.4948
+## 6 AX-86752742-B        803.7539        981.7766        856.3433</code></pre>
+<p>Again, the <code>AxiomGT1.summary.txt</code> file is located in the
+extdata subdirectory of the main package directory.</p>
+</div>
+<div id="read-and-convert-the-array-data" class="section level3">
+<h3>Read and convert the array data</h3>
+<p>We provide demo files, each with only 10 or 15 samples and 10 SNP
+markers. We will import these files, clean the sample names and convert
+them from <strong>wide</strong> format (all samples side by side) to
+<strong>long</strong> format (all samples under each other, with columns
+<code>MarkerName</code>, <code>SampleName</code>, <code>X</code>,
+<code>Y</code>, <code>R</code>, <code>ratio</code>).</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="co"># import a FullDataTable.txt file from GenomeStudio:</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>fname <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;FullDataTable.txt&quot;</span>, <span class="at">package=</span><span class="st">&quot;fitPoly&quot;</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>datGS <span class="ot">&lt;-</span> <span class="fu">readFullDataTable</span>(<span class="at">filename=</span>fname, <span class="at">out=</span><span class="st">&quot;&quot;</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="fu">head</span>(datGS)</span></code></pre></div>
+<pre><code>##   MarkerName  SampleName           X          Y         R      ratio
+## 1    SNP0001 101765-0001 0.101705887 0.77603991 0.8777458 0.88412831
+## 2    SNP0002 101765-0001 0.042711711 1.30206429 1.3447760 0.96823879
+## 3    SNP0003 101765-0001 0.017109110 0.94527599 0.9623851 0.98222218
+## 4    SNP0004 101765-0001 0.008343576 0.86564662 0.8739902 0.99045347
+## 5    SNP0005 101765-0001 1.158060329 0.09794167 1.2560020 0.07797891
+## 6    SNP0006 101765-0001 0.033692960 1.10556404 1.1392570 0.97042550</code></pre>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">unique</span>(datGS<span class="sc">$</span>MarkerName)</span></code></pre></div>
+<pre><code>##  [1] &quot;SNP0001&quot; &quot;SNP0002&quot; &quot;SNP0003&quot; &quot;SNP0004&quot; &quot;SNP0005&quot; &quot;SNP0006&quot; &quot;SNP0007&quot; &quot;SNP0008&quot; &quot;SNP0009&quot;
+## [10] &quot;SNP0010&quot;</code></pre>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">unique</span>(datGS<span class="sc">$</span>SampleName)</span></code></pre></div>
+<pre><code>##  [1] &quot;101765-0001&quot; &quot;101765-0002&quot; &quot;101765-0003&quot; &quot;101765-0004&quot; &quot;101765-0005&quot; &quot;101765-0006&quot;
+##  [7] &quot;101765-0007&quot; &quot;101765-0008&quot; &quot;101765-0009&quot; &quot;101765-0010&quot;</code></pre>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="co"># import an AxiomGT1.summary.txt file from Affymetrix Power Tools:</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>fname <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;AxiomGT1.summary.txt&quot;</span>, <span class="at">package=</span><span class="st">&quot;fitPoly&quot;</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>datAX <span class="ot">&lt;-</span> <span class="fu">readAxiomSummary</span>(<span class="at">AXdata=</span>fname, <span class="at">out=</span><span class="st">&quot;&quot;</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="fu">head</span>(datAX)</span></code></pre></div>
+<pre><code>##    MarkerName  SampleName         X         Y        R     ratio
+## 1 AX-86752740 814-379_A03  532.8074  606.8601 1139.668 0.5324887
+## 2 AX-86752740 814-379_A04 1089.7257  726.3137 1816.039 0.3999438
+## 3 AX-86752740 814-379_A05  856.1627  647.0679 1503.231 0.4304515
+## 4 AX-86752740 814-379_A06  721.9925  960.5359 1682.528 0.5708884
+## 5 AX-86752740 814-379_A07  453.8059 1134.3632 1588.169 0.7142585
+## 6 AX-86752740 814-379_A08  525.5640 1253.0268 1778.591 0.7045054</code></pre>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="fu">unique</span>(datAX<span class="sc">$</span>MarkerName)</span></code></pre></div>
+<pre><code>##  [1] &quot;AX-86752740&quot; &quot;AX-86752741&quot; &quot;AX-86752742&quot; &quot;AX-86752743&quot; &quot;AX-86752744&quot; &quot;AX-86752745&quot;
+##  [7] &quot;AX-86752746&quot; &quot;AX-86752747&quot; &quot;AX-86752748&quot; &quot;AX-86752749&quot;</code></pre>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="fu">unique</span>(datAX<span class="sc">$</span>SampleName)</span></code></pre></div>
+<pre><code>##  [1] &quot;814-379_A03&quot; &quot;814-379_A04&quot; &quot;814-379_A05&quot; &quot;814-379_A06&quot; &quot;814-379_A07&quot; &quot;814-379_A08&quot;
+##  [7] &quot;814-379_A09&quot; &quot;814-379_A10&quot; &quot;814-379_A11&quot; &quot;814-379_A12&quot; &quot;814-380_G12&quot; &quot;814-380_H01&quot;
+## [13] &quot;814-380_H02&quot; &quot;814-380_H03&quot; &quot;814-380_H04&quot;</code></pre>
+<p>These functions return the reformatted data as a data.frame. Normally
+you would use the parameter <code>out</code> to specify the name of an
+RData file (or optionally a tab-separated text file, see the help) to
+save the converted data.</p>
+</div>
+</div>
+<div id="exercise-2-rename-the-samples-and-separate-by-ploidy-level" class="section level2">
+<h2>Exercise 2: Rename the samples and separate by ploidy level</h2>
+<p>Normally the marker names and/or the sample names as used in the
+array software are different from the original names. In these cases
+there should be a file specifying the translation between the two sets
+of names. Such a file can also contain additional information on the
+samples, such as the categories of the samples (e.g. F1 parent 1, F1
+parent 2, F1 individual, association panel, wild, control) and ploidy
+(e.g. 2x, 4x). In this exercise we will convert the marker and sample
+names of the <code>datAX</code> data.frame and split it into two parts:
+one for the tetraploid and one for the diploid samples.</p>
+<p>First we rename the markers. The translation is specified by file
+<code>CsvAnnotationFile.v1.txt</code>. Since the markers on the array
+are a fixed set these annotation files don’t change and can usually be
+assumed to be correct (i.e. all marker names in the array can be assumed
+also to occur in the annotation file and v.v., and all
+<code>customer_id</code> codes can be assumed to be unique). Therefore
+we don’t need to check this and can perform the translation
+directly:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a>fname <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;CsvAnnotationFile.v1.txt&quot;</span>, <span class="at">package=</span><span class="st">&quot;fitPoly&quot;</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a>mrktable <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(fname, <span class="at">comment.char=</span><span class="st">&quot;#&quot;</span>)</span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a><span class="fu">levels</span>(datAX<span class="sc">$</span>MarkerName) <span class="ot">&lt;-</span> </span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a>  mrktable<span class="sc">$</span>customer_id[<span class="fu">match</span>(<span class="fu">levels</span>(datAX<span class="sc">$</span>MarkerName), mrktable<span class="sc">$</span>Probe.Set.ID)]</span></code></pre></div>
+<p>Next we rename the samples. The samples are different between
+projects using the same array, and sample annotations are usually made
+by hand, in different formats, and cannot be assumed to be error-free.
+Also it may be that there are samples of various ploidy levels, which we
+may want to split into separate sets. For this we use function
+<code>splitNrenameSamples</code>:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a>fname <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;AX_sampletable.csv&quot;</span>, <span class="at">package=</span><span class="st">&quot;fitPoly&quot;</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a>smptable <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(fname)</span>
+<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a><span class="fu">head</span>(smptable)</span></code></pre></div>
+<pre><code>##     X SubmittedPlateName SubmittedWell    PlateName Well SampleName Ploidy SampleSource
+## 1  99       SMP4_0008814           A03 SMP4_0008814  A03       K001     4x     Customer
+## 2 100       SMP4_0008814           A04 SMP4_0008814  A04       K002     4x     Customer
+## 3 101       SMP4_0008814           A05 SMP4_0008814  A05       K003     4x     Customer
+## 4 102       SMP4_0008814           A06 SMP4_0008814  A06       K004     4x     Customer
+## 5 103       SMP4_0008814           A07 SMP4_0008814  A07       K007     4x     Customer
+## 6 104       SMP4_0008814           A08 SMP4_0008814  A08       K008     4x     Customer
+##         SampleType InternalPico CVPercent   BestArray FailureMode
+## 1 Rose genomic DNA        16.46      6.90 814-379_A03          NA
+## 2 Rose genomic DNA        14.87      3.63 814-379_A04          NA
+## 3 Rose genomic DNA         8.32      6.97 814-379_A05          NA
+## 4 Rose genomic DNA        23.68      1.52 814-379_A06          NA
+## 5 Rose genomic DNA        20.28      3.61 814-379_A07          NA
+## 6 Rose genomic DNA         6.78      2.29 814-379_A08          NA</code></pre>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a><span class="co"># no split, return the original data.frame with substituted SampleNames:</span></span>
+<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a>datAX_unsplit <span class="ot">&lt;-</span> <span class="fu">splitNrenameSamples</span>(<span class="at">dat=</span>datAX, <span class="at">sampletable=</span>smptable,</span>
+<span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a>                                     <span class="at">SampleID=</span><span class="st">&quot;BestArray&quot;</span>, <span class="at">CustomerID=</span><span class="st">&quot;SampleName&quot;</span>,</span>
+<span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a>                                     <span class="at">out=</span><span class="cn">NA</span>)</span>
+<span id="cb21-5"><a href="#cb21-5" tabindex="-1"></a><span class="fu">head</span>(datAX_unsplit) </span></code></pre></div>
+<pre><code>##    MarkerName SampleName         X         Y        R     ratio
+## 1 AX-86752740       K001  532.8074  606.8601 1139.668 0.5324887
+## 2 AX-86752740       K002 1089.7257  726.3137 1816.039 0.3999438
+## 3 AX-86752740       K003  856.1627  647.0679 1503.231 0.4304515
+## 4 AX-86752740       K004  721.9925  960.5359 1682.528 0.5708884
+## 5 AX-86752740       K007  453.8059 1134.3632 1588.169 0.7142585
+## 6 AX-86752740       K008  525.5640 1253.0268 1778.591 0.7045054</code></pre>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a><span class="co"># split samples based on ploidy, return a list of data.frames:</span></span>
+<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a>datAX_split <span class="ot">&lt;-</span> <span class="fu">splitNrenameSamples</span>(<span class="at">dat=</span>datAX, <span class="at">sampletable=</span>smptable,</span>
+<span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a>                                   <span class="at">SampleID=</span><span class="st">&quot;BestArray&quot;</span>, <span class="at">CustomerID=</span><span class="st">&quot;SampleName&quot;</span>,</span>
+<span id="cb23-4"><a href="#cb23-4" tabindex="-1"></a>                                   <span class="at">Ploidy=</span><span class="st">&quot;Ploidy&quot;</span>, <span class="at">out=</span><span class="cn">NA</span>)</span></code></pre></div>
+<pre><code>## sampletable contains ploidy levels 2x 4x
+## the samples will be split per ploidy value</code></pre>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a><span class="fu">head</span>(datAX_split[[<span class="dv">1</span>]])</span></code></pre></div>
+<pre><code>##     MarkerName SampleName        X        Y        R     ratio
+## 11 AX-86752740        V01 720.7784 2086.717 2807.496 0.7432664
+## 12 AX-86752740        V02 427.6401 1864.825 2292.465 0.8134584
+## 13 AX-86752740        V03 756.3445 1333.276 2089.621 0.6380470
+## 14 AX-86752740        V04 415.7363 1850.588 2266.325 0.8165593
+## 15 AX-86752740        V05 722.2508 1729.903 2452.154 0.7054627
+## 26 AX-86752741        V01 864.9218 1615.226 2480.148 0.6512620</code></pre>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" tabindex="-1"></a><span class="fu">head</span>(datAX_split[[<span class="dv">2</span>]])</span></code></pre></div>
+<pre><code>##    MarkerName SampleName         X         Y        R     ratio
+## 1 AX-86752740       K001  532.8074  606.8601 1139.668 0.5324887
+## 2 AX-86752740       K002 1089.7257  726.3137 1816.039 0.3999438
+## 3 AX-86752740       K003  856.1627  647.0679 1503.231 0.4304515
+## 4 AX-86752740       K004  721.9925  960.5359 1682.528 0.5708884
+## 5 AX-86752740       K007  453.8059 1134.3632 1588.169 0.7142585
+## 6 AX-86752740       K008  525.5640 1253.0268 1778.591 0.7045054</code></pre>
+<p>Although we use <code>out=NA</code> in this demo, normally you would
+provide a filename to store the results.</p>
+</div>
+<div id="exercise-3-filtering-the-data-based-on-total-signal-intensity" class="section level2">
+<h2>Exercise 3: Filtering the data based on total signal intensity</h2>
+<p>The total signal intensity R = X + Y can be used as a measure whether
+sample DNA is ok, the marker is designed well, and individual datapoints
+are acceptable. Selection of data based on signal intensity has to be
+done before dosage calling by fitPoly as fitPoly only works with the
+signal ratio, not with absolute signal intensities. For this exercise we
+will use an example data.frame <code>XYdat</code> .</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" tabindex="-1"></a><span class="fu">data</span>(XYdat)</span>
+<span id="cb29-2"><a href="#cb29-2" tabindex="-1"></a><span class="fu">head</span>(XYdat)</span></code></pre></div>
+<pre><code>##          MarkerName SampleName        X        Y         R     ratio
+## 2013 RhK5_1000_451P       K001 291.7016 853.7687 1145.4703 0.7453433
+## 2014 RhK5_1000_451P       K002 295.5672 392.0710  687.6382 0.5701705
+## 2015 RhK5_1000_451P       K003 260.1488 364.9967  625.1455 0.5838588
+## 2016 RhK5_1000_451P       K004 248.3574 314.0045  562.3619 0.5583673
+## 2017 RhK5_1000_451P       K007 265.1335 286.6872  551.8208 0.5195296
+## 2018 RhK5_1000_451P       K008 257.5974 337.2776  594.8750 0.5669723</code></pre>
+<div id="a-selection-of-samples-based-on-total-signal-intensity" class="section level3">
+<h3>3a: Selection of samples based on total signal intensity</h3>
+<p>Samples with bad DNA quality may be recognized by a low R (total
+signal intensity), averaged over all markers. This information is saved
+in a file produced by <code>readFullDataTable</code> or
+<code>readAxiomSummary</code> if parameter out is specified. However it
+is also quite easy to calculate directly if all data are in the same
+data.frame:</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" tabindex="-1"></a>sampRmean <span class="ot">&lt;-</span> <span class="fu">tapply</span>(XYdat<span class="sc">$</span>R, XYdat<span class="sc">$</span>SampleName, mean)</span>
+<span id="cb31-2"><a href="#cb31-2" tabindex="-1"></a><span class="fu">hist</span>(sampRmean, <span class="at">breaks =</span> <span class="dv">20</span>)</span></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p>It is clear that the mean R values for all samples are quite similar
+so there is no reason to exclude any samples at this point.</p>
+</div>
+<div id="b-selection-of-markers-based-on-total-signal-intensity" class="section level3">
+<h3>3b: Selection of markers based on total signal intensity</h3>
+<p>Next we will check if any markers should be excluded based on their
+overall signal intensity R. We calculate a number of statistics of the R
+distribution per marker and study the 95% quantiles (q95) of the
+markers:</p>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" tabindex="-1"></a>Rstats <span class="ot">&lt;-</span> <span class="fu">calcRstats</span>(XYdat, <span class="at">out=</span><span class="cn">NA</span>)</span>
+<span id="cb32-2"><a href="#cb32-2" tabindex="-1"></a><span class="fu">quantile</span>(Rstats<span class="sc">$</span>q95)</span></code></pre></div>
+<pre><code>##        0%       25%       50%       75%      100% 
+##  252.7965 2677.6312 3295.4407 3698.0998 5871.7522</code></pre>
+<p>In contrast to the samples, the markers vary widely in signal
+intensity. Probably there is a level below which no usable markers
+occur. We define a number of levels for q95 and at each level we select
+3 markers. We then draw XY-scatterplots for these markers and decide
+from which level clear clustering pattern occur:</p>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" tabindex="-1"></a>Rlevels <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">200</span>, <span class="dv">6000</span>, <span class="at">by=</span><span class="dv">400</span>)</span>
+<span id="cb34-2"><a href="#cb34-2" tabindex="-1"></a>sel.Rstats <span class="ot">&lt;-</span> <span class="fu">selMarkers_byR</span>(Rstats, Rlevels, <span class="at">mrkperlevel=</span><span class="dv">3</span>)</span>
+<span id="cb34-3"><a href="#cb34-3" tabindex="-1"></a><span class="fu">drawXYplots</span>(<span class="at">dat=</span>XYdat, <span class="at">markers=</span>sel.Rstats,</span>
+<span id="cb34-4"><a href="#cb34-4" tabindex="-1"></a>            <span class="at">out=</span><span class="st">&quot;your-path-and filename&quot;</span>, <span class="at">drawRthresholds=</span><span class="cn">TRUE</span>)</span></code></pre></div>
+<p>This generates a series of pages, each with 6 plots; here is part of
+one such page: <img src="data:image/png;base64,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" alt="Part of a page generated by drawXYplots" /></p>
+<p>These two markers show more or less clear clusters and have a q95
+around 1600, so clearly the threshold below which markers should be
+excluded must be lower than 1600. In this case we will exclude all
+markers with q95 &lt; 1400. This selection will be combined with a
+within-marker selection of samples in function
+<code>makeFitPolyFiles</code> (see next exercise), but if no
+within-marker selection is needed it can also be done as shown here:</p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" tabindex="-1"></a>keep <span class="ot">&lt;-</span> Rstats<span class="sc">$</span>MarkerName[Rstats<span class="sc">$</span>q95 <span class="sc">&gt;=</span> <span class="dv">1400</span>]</span>
+<span id="cb35-2"><a href="#cb35-2" tabindex="-1"></a>dat <span class="ot">&lt;-</span> XYdat[XYdat<span class="sc">$</span>MarkerName <span class="sc">%in%</span> keep,]</span></code></pre></div>
+</div>
+<div id="c-selection-based-on-r-values-of-samples-within-markers" class="section level3">
+<h3>3c: Selection based on R values of samples within markers</h3>
+<p>In the plots as shown above the diagonal line represents R = 0.5 *
+q95. Different, and even multiple, R threshold lines can be drawn by
+using the <code>Rthreshold.param</code> paprameter of
+<code>drawXYplots</code> (see the help). By looking at a series of
+XY-plots we can decide if we want to exclude samples with R &lt; 0.5 *
+q95 (or any other threshold). Note that the within-marker threshold
+should be based on the q95 (or another R statistic) of each marker, as
+the signal intensity differs a lot between markers. The following
+selects all markers where q95 (the 95% quantile of R) is &gt;= 1400, and
+within these markers it assigns a missing value (NA) to all markers
+where R &lt; 0.5 * q95:</p>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" tabindex="-1"></a>dat.sel <span class="ot">&lt;-</span> <span class="fu">makeFitPolyFiles</span>(XYdat, <span class="at">out=</span><span class="cn">NA</span>, <span class="at">Rquantile=</span><span class="fl">0.95</span>, <span class="at">marker.threshold=</span><span class="dv">1400</span>,</span>
+<span id="cb36-2"><a href="#cb36-2" tabindex="-1"></a>                            <span class="at">Rthreshold.param=</span><span class="fu">c</span>(<span class="fl">0.95</span>, <span class="fl">0.5</span>, <span class="dv">0</span>))</span>
+<span id="cb36-3"><a href="#cb36-3" tabindex="-1"></a><span class="co">#dat.sel is in this case a list with only one useful element (the other element</span></span>
+<span id="cb36-4"><a href="#cb36-4" tabindex="-1"></a><span class="co">#is NA); simplify:</span></span>
+<span id="cb36-5"><a href="#cb36-5" tabindex="-1"></a>dat.sel <span class="ot">&lt;-</span> dat.sel[[<span class="dv">1</span>]]</span>
+<span id="cb36-6"><a href="#cb36-6" tabindex="-1"></a><span class="fu">head</span>(dat.sel)</span></code></pre></div>
+<pre><code>##           MarkerName SampleName        X        Y        R     ratio
+## 21173 RhK5_100_3510P       K001 2704.714 369.3005 3074.015 0.1201362
+## 21174 RhK5_100_3510P       K002 2472.556 756.2809 3228.837 0.2342270
+## 21175 RhK5_100_3510P       K003 2281.848 759.0215 3040.869 0.2496068
+## 21176 RhK5_100_3510P       K004 2563.892 857.1673 3421.059 0.2505561
+## 21177 RhK5_100_3510P       K007 2796.043 459.6424 3255.686 0.1411814
+## 21178 RhK5_100_3510P       K008 2459.193 789.6996 3248.893 0.2430673</code></pre>
+<p>For more information on <code>makeFitPoly</code> files see the
+help.</p>
+</div>
+</div>
+<div id="excersise-4-run-fitpoly" class="section level2">
+<h2>Excersise 4: run fitPoly</h2>
+<p>This vignette is about preparing and selecting data for dosage
+scoring by using the function <code>fitMarkers</code>. We assume that
+data.frame <code>dat.sel</code> from the previous exercise is still in
+memory.</p>
+<div class="sourceCode" id="cb38"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" tabindex="-1"></a><span class="fu">fitMarkers</span>(<span class="at">ploidy=</span><span class="dv">4</span>, <span class="at">markers=</span><span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="at">data=</span>dat.sel, <span class="at">filePrefix=</span><span class="st">&quot;A&quot;</span>, <span class="at">rdaFiles=</span><span class="cn">TRUE</span>)</span></code></pre></div>
+<p>The main result of this function call is a file
+<code>A_scores.RData</code> which contains a data.frame with for each
+marker (in this case only the first 3 markers) and sample the assigned
+dosage, as well as some further data. For further information on the
+input and output of fitPoly functions see the vignette <a href="Segregation_analysis_of_dosage_scores.html">Segregation analysis
+of dosage scores</a> in this package.</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

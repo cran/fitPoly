@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Roeland E. Voorrips" />
+<meta name="author" content="Alejandro Therese Navarro" />
+
+<meta name="date" content="2025-02-11" />
+
+<title>Analysis of F1 scores</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Analysis of F1 scores</h1>
+<h4 class="author">Roeland E. Voorrips</h4>
+<h4 class="author">Alejandro Therese Navarro</h4>
+<h4 class="date">2025-02-11</h4>
+
+
+
+<p>The package <code>fitPoly</code> includes several helper functions to
+input data from different SNP array providers as well as utilities to
+analyse the quality of genotype scores obtained by the main model of
+<code>fitPoly</code>. This vignette shows how to use the second set of
+functions and explains their output; another vignette deals with the <a href="Data_import_and_preparation.html">data import and preparation</a>.
+The package offers more functions than shown here, and the functions we
+use have additional parameters; check the help for extra
+information.</p>
+<p>In this vignette we will take the output of fitPoly for one Full-Sib
+family and its parents, and analyze it:</p>
+<ul>
+<li>Initial determination of the segregation types of all markers and
+quality checks (exercise 1)</li>
+<li>Check for possibly “shifted” markers, correct the shifts and
+re-determine their segregation type and quality scores (exercise 2)</li>
+<li>Selection of reliable, well-scored SNPs (exercise 3)</li>
+<li>Combination of the results of two different assays for the same SNP
+and export a file that has the dosage scores for the parents and FS
+individuals (exercise 4)</li>
+</ul>
+<p>Load the package and the scores data.frame produced by fitPoly:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(fitPoly)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">data</span>(scores)</span></code></pre></div>
+<div id="exercise-1-segregation-types-and-quality" class="section level2">
+<h2>Exercise 1: Segregation types and quality</h2>
+<p>Function <code>fitMarkers</code> in package <code>fitPoly</code>
+returns (a.o.) a file with dosage scores for all markers where a model
+could be fitted. These <code>data</code> are in data.frame scores. , of
+which we show a part:</p>
+<pre><code>##     marker     MarkerName SampleName ratio P0 P1    P2    P3 P4 maxgeno  maxP geno
+## 637      5 RhK5_1000_451Q       K001 0.343  0  1 0.000 0.000  0       1 1.000    1
+## 638      5 RhK5_1000_451Q       K002 0.520  0  0 1.000 0.000  0       2 1.000    2
+## 639      5 RhK5_1000_451Q       K003 0.341  0  1 0.000 0.000  0       1 1.000    1
+## 640      5 RhK5_1000_451Q       K004 0.361  0  1 0.000 0.000  0       1 1.000    1
+## 641      5 RhK5_1000_451Q       K007 0.609  0  0 0.999 0.001  0       2 0.999    2
+## 642      5 RhK5_1000_451Q       K008 0.345  0  1 0.000 0.000  0       1 1.000    1</code></pre>
+<p>Columns P0 … P4 show the probabilities that the dosage is nulliplex …
+quadruplex. The last column, geno, is the dosage assigned; it is NA if
+the probability of the most probable dosage is less than 0.99 (the
+threshold used in the <code>fitPoly</code> analysis in this case). In
+the first part of this vignette we will only use the geno values, but at
+some point the P-values will also be considered.</p>
+<p>The initial check for segregation type is carried out by function
+<code>checkF1</code>:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># specify parental and F1 samples:</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>par1 <span class="ot">&lt;-</span> <span class="st">&quot;P540a1&quot;</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>par2 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;P867a1&quot;</span>,<span class="st">&quot;P867a2&quot;</span>,<span class="st">&quot;P867b&quot;</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>F1 <span class="ot">&lt;-</span> <span class="fu">levels</span>(scores<span class="sc">$</span>SampleName)[<span class="fu">substr</span>(<span class="fu">levels</span>(scores<span class="sc">$</span>SampleName),<span class="dv">1</span>,<span class="dv">1</span>)<span class="sc">==</span><span class="st">&quot;K&quot;</span>]</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>chk1 <span class="ot">&lt;-</span> <span class="fu">checkF1</span>(scores, par1, par2, F1,</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>                <span class="at">polysomic=</span><span class="cn">TRUE</span>, <span class="at">disomic=</span><span class="cn">TRUE</span>, <span class="at">mixed=</span><span class="cn">FALSE</span>, </span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>                <span class="at">ploidy=</span><span class="dv">4</span>, <span class="at">outfile=</span><span class="cn">NA</span>)</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#some parts of the result:</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(chk1[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">14</span>])</span></code></pre></div>
+<table>
+<colgroup>
+<col width="3%" />
+<col width="17%" />
+<col width="8%" />
+<col width="8%" />
+<col width="5%" />
+<col width="5%" />
+<col width="5%" />
+<col width="5%" />
+<col width="5%" />
+<col width="6%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="6%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="right">m</th>
+<th align="left">MarkerName</th>
+<th align="right">parent1</th>
+<th align="right">parent2</th>
+<th align="right">F1_0</th>
+<th align="right">F1_1</th>
+<th align="right">F1_2</th>
+<th align="right">F1_3</th>
+<th align="right">F1_4</th>
+<th align="right">F1_NA</th>
+<th align="right">P540a1</th>
+<th align="right">P867a1</th>
+<th align="right">P867a2</th>
+<th align="right">P867b</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">5</td>
+<td align="left">RhK5_1000_451Q</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">57</td>
+<td align="right">94</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="right">6</td>
+<td align="left">RhK5_1005_2503P</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">21</td>
+<td align="right">62</td>
+<td align="right">52</td>
+<td align="right">12</td>
+<td align="right">8</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">3</td>
+<td align="right">3</td>
+</tr>
+<tr class="odd">
+<td align="right">7</td>
+<td align="left">RhK5_1005_2503Q</td>
+<td align="right">2</td>
+<td align="right">NA</td>
+<td align="right">0</td>
+<td align="right">21</td>
+<td align="right">59</td>
+<td align="right">51</td>
+<td align="right">12</td>
+<td align="right">12</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">3</td>
+<td align="right">2</td>
+</tr>
+<tr class="even">
+<td align="right">8</td>
+<td align="left">RhK5_1007_811P</td>
+<td align="right">3</td>
+<td align="right">2</td>
+<td align="right">0</td>
+<td align="right">12</td>
+<td align="right">53</td>
+<td align="right">53</td>
+<td align="right">13</td>
+<td align="right">24</td>
+<td align="right">3</td>
+<td align="right">2</td>
+<td align="right">2</td>
+<td align="right">NA</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(chk1[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>,<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, <span class="dv">19</span><span class="sc">:</span><span class="dv">22</span>, <span class="dv">26</span>)])</span></code></pre></div>
+<table>
+<colgroup>
+<col width="2%" />
+<col width="13%" />
+<col width="12%" />
+<col width="21%" />
+<col width="18%" />
+<col width="22%" />
+<col width="8%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="right">m</th>
+<th align="left">MarkerName</th>
+<th align="left">bestParentfit</th>
+<th align="right">frqInvalid_bestParentfit</th>
+<th align="right">Pvalue_bestParentfit</th>
+<th align="left">matchParent_bestParentfit</th>
+<th align="right">qall_mult</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">5</td>
+<td align="left">RhK5_1000_451Q</td>
+<td align="left">11_1</td>
+<td align="right">0.0195</td>
+<td align="right">0.0026</td>
+<td align="left">Yes</td>
+<td align="right">0.1428</td>
+</tr>
+<tr class="even">
+<td align="right">6</td>
+<td align="left">RhK5_1005_2503P</td>
+<td align="left">1331_1</td>
+<td align="right">0.0000</td>
+<td align="right">0.3054</td>
+<td align="left">Yes</td>
+<td align="right">0.8710</td>
+</tr>
+<tr class="odd">
+<td align="right">7</td>
+<td align="left">RhK5_1005_2503Q</td>
+<td align="left">1331_1</td>
+<td align="right">0.0000</td>
+<td align="right">0.3699</td>
+<td align="left">OneOK</td>
+<td align="right">0.4032</td>
+</tr>
+<tr class="even">
+<td align="right">8</td>
+<td align="left">RhK5_1007_811P</td>
+<td align="left">1551_1</td>
+<td align="right">0.0000</td>
+<td align="right">0.8971</td>
+<td align="left">Yes</td>
+<td align="right">0.5108</td>
+</tr>
+</tbody>
+</table>
+<p>This is a rose (<em>Rosa x hybrida)</em> dataset and we expect that
+both polysomic and disomic inheritance may occur. By setting both
+corresponding parameters to TRUE we consider both sets of segregation
+types. The result is a data.frame with one row for each marker. The
+first columns list the marker name, the inferred parental dosages, the
+observed F1 segregation and the observed parental sample dosages. The
+<code>bestParentfit</code> column lists the selected segregation type
+and the next 3 columns list 3 parameters describing how well this
+segregation fits with the observations. The <code>qall_mult</code>
+column is an overall quality assessment, from poor (0) to perfect (1).
+There are more columns in <code>chk1</code>, and with other parameter
+settings even more columns will be produced; for a full explanation
+refer to the help. For this demo we set <code>outfile</code> to NA, but
+we could also have specified a filename. In that case a tab-separated
+text file would be saved which can be imported into Excel for easy
+viewing.</p>
+<p>The segregation codes need some explanation. They consist of 2 parts:
+the first part has the segregation ratios (e.g. 11 means 1:1, 141 means
+1:4:1 and so on; a single 1 means no segregation, all F1 have the same
+dosage). An underscore separates the two parts and the second part is a
+single number specifying the lowest dosage occurring in the segregation.
+For example: 121_0 means 1 nulliplex : 2 simplex : 2 duplex; 11_3 means
+1 triplex : 1 quadruplex. There is one tetrasomic segregation type
+1:8:18:8:1 where one of the ratios is larger than 9 and cannot be
+represented by a digit; in this and similar cases we use letters A-Z to
+represent ratios 10-35, so this segregation is represented as 18I81_0,
+with the I meaning 18. For higher ploidy levels this system is extended,
+see the help for a full explanation.</p>
+</div>
+<div id="exercise-2-checking-for-shifted-markers" class="section level2">
+<h2>Exercise 2: checking for “shifted” markers</h2>
+<p>When not all dosages are present among the samples it is possible
+that <code>fitPoly</code> assigns the peaks in the signal ratio
+histogram to the wrong dosages. For example, if parents in reality have
+dosages 0 and 1, also the F1 progeny will (almost) only have dosages 0
+or 1. If no other samples are analyzed, only two of the five dosages are
+present, and these might be mis-interpreted as beings dosages 1 and 2
+instead of 0 and 1. These mis-assignments are called “shifts”. fitPoly
+checks against such possible shifts whether or not parents and F1
+populations are defined but it doesn’t catch them all.</p>
+<p>The function <code>correctDosages</code> is provided that based on
+the result of checkF1 checks if shifting the dosages up or down by 1
+would be worth to try. The result is a set of suggested shifts, that
+should then again (using checkF1) be checked for their actual fit.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>cordos <span class="ot">&lt;-</span> <span class="fu">correctDosages</span>(chk1, scores, par1, par2, <span class="at">ploidy=</span><span class="dv">4</span>,</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>                        <span class="at">polysomic=</span><span class="cn">TRUE</span>, <span class="at">disomic=</span><span class="cn">TRUE</span>, <span class="at">mixed=</span><span class="cn">FALSE</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co"># show the nonzero shifts:</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>cordos[cordos<span class="sc">$</span>shift<span class="sc">!=</span><span class="dv">0</span>,]</span></code></pre></div>
+<pre><code>##          MarkerName segtype parent1 parent2 shift   fracNotOk ParNA
+## 10  RhK5_10102_270P    11_2       2      NA     1 0.000000000     1
+## 15  RhK5_1011_3044Q    11_1       1       2    -1 0.000000000     0
+## 22   RhK5_101_3700P    11_1       1      NA    -1 0.012820513     1
+## 25   RhK5_1020_824Q    11_1       1       2    -1 0.000000000     0
+## 27   RhK5_1021_984Q    11_1       1       2    -1 0.000000000     0
+## 35  RhK5_10334_506Q    11_2      NA       2     1 0.000000000     1
+## 45  RhK5_10484_448Q    11_1       1      NA    -1 0.007936508     1
+## 48   RhK5_1054_473P    11_1       2       1    -1 0.000000000     0
+## 55  RhK5_10619_199Q    11_1       1       2    -1 0.000000000     0
+## 63  RhK5_10728_511P    11_1       2       1    -1 0.012658228     0
+## 92  RhK5_11250_511P    11_1       2       1    -1 0.013071895     0
+## 99  RhK5_11334_499Q    11_1       1       2    -1 0.000000000     0
+## 101 RhK5_1145_1123Q    11_1       1       2    -1 0.000000000     0</code></pre>
+<p>The column <code>shift</code> contains the suggested shifts to try: a
+0 means no shift suggested, a 1 means: shift all dosages assigned by
+fitPoly up (0 becomes 1, 1 becomes 2, 2 becomes 3, 3 and 4 become 4 (3
+and 4 are merged)). A shift of -1 means that all dosages should be
+decreased by 1 (merging previous dosages 0 and 1 into dosage 0). Note
+that this is a rather simplistic way to check for possibly shifted
+markers. If there are more samples available than only the F1 population
+and its parents, those might also be informative about possible shifts.
+Also, sometimes both the unshifted and the shifted version of the marker
+might be acceptable. In such cases it may be useful to keep both
+versions and decide later on (after mapping or haplotyping steps) which
+version fits best.</p>
+<p>The next step is to run <code>checkF1</code> again with as additional
+parameter these shifts; it will then perform the indicated dosage shift
+on all samples (parental and F1) before selecting the most likely
+segregation type and quality assessment:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co">#select the markers where a shift should be tried:</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>cordos <span class="ot">&lt;-</span> cordos[cordos<span class="sc">$</span>shift <span class="sc">!=</span> <span class="dv">0</span>,] </span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>subscores <span class="ot">&lt;-</span> scores[scores<span class="sc">$</span>MarkerName <span class="sc">%in%</span> <span class="fu">as.character</span>(cordos<span class="sc">$</span>MarkerName),]</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>chk2 <span class="ot">&lt;-</span> <span class="fu">checkF1</span>(subscores, par1, par2, F1,</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>                <span class="at">polysomic=</span><span class="cn">TRUE</span>, <span class="at">disomic=</span><span class="cn">TRUE</span>, <span class="at">mixed=</span><span class="cn">FALSE</span>, </span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>                <span class="at">ploidy=</span><span class="dv">4</span>, <span class="at">outfile=</span><span class="cn">NA</span>, <span class="at">shiftmarkers=</span>cordos)</span></code></pre></div>
+<p>Data.frame <code>chk2</code> has the same format as ck1 but has an
+additional column “shift” at the end. For the next steps it is useful to
+merge <code>chk1</code> and <code>chk2</code>. In order to do that, chk1
+needs also to get this extra column:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>chk1<span class="sc">$</span>shift <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>chk <span class="ot">&lt;-</span> <span class="fu">rbind</span>(chk1, chk2)</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>chk <span class="ot">&lt;-</span> chk[<span class="fu">order</span>(chk<span class="sc">$</span>MarkerName),]</span></code></pre></div>
+</div>
+<div id="exercise-3-select-acceptably-scored-markers" class="section level2">
+<h2>Exercise 3: select acceptably scored markers</h2>
+<p>The data.frame <code>chk</code> now has all unshifted and shifted
+versions of the markers. Each of the (versions of the) markers has been
+checked for its quality, which is (a.o.) expressed in its value of
+qall_mult. We would like to select only those (versions of) markers that
+are of sufficient quality. As a rule of thumb, all scores of markers
+with qall_mult==0 are bad and all others might be acceptable, but
+perhaps we can raise the threshold for qall_mult a bit for a more
+stringent selection, without losing valuable markers. The approach is to
+study XY-scatterplots for several markers at different levels of
+qall_mult and see from which level good (well-scored) markers appear.
+This approach is similar to that used to exclude markers based on total
+signal intensity, as discussed in the vignette on data import and
+preparation. In order to produce scatterplots with dots colored
+according to assigned dosages we first combine the X and Y signals with
+the geno (dosage) values.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">data</span>(<span class="st">&quot;XYdat&quot;</span>) </span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>XYgeno <span class="ot">&lt;-</span> <span class="fu">combineFiles</span>(<span class="at">XYdata=</span>XYdat, <span class="at">scores=</span>scores)</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="co"># define qall levels of 0, 0.05, 0.10 up to 1 where we want to inspect some SNPs:</span></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>qall.levels <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">by=</span><span class="fl">0.05</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="co"># select six SNPs with qall values near each of these values and draw their plots:</span></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>chkx <span class="ot">&lt;-</span> <span class="fu">selMarkers_qall</span>(chk,  qall.levels, <span class="at">mrkperlevel=</span><span class="dv">6</span>)</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="fu">drawXYplots</span>(<span class="at">dat=</span>XYgeno, <span class="at">markers=</span>chkx,</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>            <span class="at">out=</span><span class="st">&quot;your-path-and filename&quot;</span>,</span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>            <span class="at">genocol=</span><span class="fu">get.genocol</span>(<span class="at">ploidy=</span><span class="dv">4</span>), <span class="at">sample.groups=</span><span class="fu">list</span>(par1, par2),</span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a>            <span class="at">groups.col=</span><span class="fu">c</span>(<span class="st">&quot;red&quot;</span>, <span class="st">&quot;blue&quot;</span>), <span class="at">ploidy=</span><span class="dv">4</span>)</span></code></pre></div>
+<p>This generates a series of pages, each with 6 plots; here is part of
+one such page: <img src="data:image/png;base64,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" alt="Part of a page generated by drawXYplots" /></p>
+<p>The <code>drawXYplots</code> command here is quite complex. A full
+explanation of all parameters can be found in the help. Some things to
+note here: <code>genocol</code> sets the (pastel) colors assigned to
+each of the dosages, from red (nulliplex) through blue (duplex) to green
+(quadruplex), and grey for samples with missing dosage score. The
+parents are highlighted in red and blue via parameters sample.groups and
+groups.col. The two plots show a duplex x duplex (1:8:18:8:1) and a
+simplex x simplex (1:2:1) marker. A conclusion from this series of plots
+is that already at qall_mult==0.05 most of the markers appear to be
+well-scored. A next step could be to try to find a qall_mult threshold
+between 0 and 0.05 to separate the well-scored and badly scored markers;
+we leave that for the reader and for now we will accept all marker
+(versions) with qall &gt; 0, and save them to a dosage file:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="co">#select only the markers with qall_mult &gt; 0:</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>chk <span class="ot">&lt;-</span> chk[<span class="sc">!</span><span class="fu">is.na</span>(chk<span class="sc">$</span>qall_mult) <span class="sc">&amp;</span> chk<span class="sc">$</span>qall_mult <span class="sc">&gt;</span> <span class="dv">0</span>,]</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="co">#write the dosage file, applying the shifts as listed in chk:</span></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>dosages <span class="ot">&lt;-</span> <span class="fu">writeDosagefile</span>(chk, scores, par1, par2, F1,</span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>                           <span class="at">polysomic=</span><span class="cn">TRUE</span>, <span class="at">disomic=</span><span class="cn">TRUE</span>, <span class="at">mixed=</span><span class="cn">FALSE</span>,</span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>                           <span class="at">ploidy=</span><span class="dv">4</span>, <span class="at">scorefile=</span><span class="cn">NA</span>)</span></code></pre></div>
+<pre><code>## batch 1 of 1</code></pre>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(dosages[<span class="dv">10</span><span class="sc">:</span><span class="dv">14</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>])</span></code></pre></div>
+<table>
+<colgroup>
+<col width="3%" />
+<col width="18%" />
+<col width="8%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="6%" />
+<col width="8%" />
+<col width="8%" />
+<col width="5%" />
+<col width="5%" />
+<col width="5%" />
+<col width="5%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left"></th>
+<th align="left">MarkerName</th>
+<th align="left">segtype</th>
+<th align="right">P540a1</th>
+<th align="right">P867a1</th>
+<th align="right">P867a2</th>
+<th align="right">P867b</th>
+<th align="right">parent1</th>
+<th align="right">parent2</th>
+<th align="right">K001</th>
+<th align="right">K002</th>
+<th align="right">K003</th>
+<th align="right">K004</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">10</td>
+<td align="left">RhK5_10102_270Pn</td>
+<td align="left">11_2</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">NA</td>
+<td align="right">3</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">2</td>
+<td align="right">2</td>
+<td align="right">2</td>
+<td align="right">2</td>
+</tr>
+<tr class="even">
+<td align="left">11</td>
+<td align="left">RhK5_10102_270Ps</td>
+<td align="left">11_3</td>
+<td align="right">3</td>
+<td align="right">4</td>
+<td align="right">NA</td>
+<td align="right">4</td>
+<td align="right">3</td>
+<td align="right">4</td>
+<td align="right">3</td>
+<td align="right">3</td>
+<td align="right">3</td>
+<td align="right">3</td>
+</tr>
+<tr class="odd">
+<td align="left">12</td>
+<td align="left">RhK5_10107_247Pn</td>
+<td align="left">121_0</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">13</td>
+<td align="left">RhK5_10107_247Qn</td>
+<td align="left">121_0</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">14</td>
+<td align="left">RhK5_1011_3044Pn</td>
+<td align="left">11_0</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+<p>Normally we would specify a filename for <code>scorefile</code>, to
+get the results also as a tab-separated text file. The dosages
+data.frame (and file) list the marker, segregation type, the scores of
+the parental samples, the consensus/inferred parental dosages and the
+dosages of the F1 individuals. If <code>chk</code> contains a column
+“shift”, as here, the shift is applied to the dosages as listed in the
+score data.frame. In that case also an <code>n</code> or <code>s</code>
+is appended to the <code>MarkerNames</code> to indicate they were not
+shifted (shift==0) or shifted (shift!=0); in this way we avoid having
+duplicated markers if both the nonshifted and the shifted version passed
+the quality filter.</p>
+<p>Here we see that the two probes (P and Q) of marker RhK5_101_3700
+were initially scored with a difference of 1 in the dosages (versions Pn
+vs Qn, where n means non-shifted). Function <code>correctDosages</code>
+found that the P probe should possibly be shifted and this resulted in
+version Ps (s for shifted). Versions Ps and Qn generally have the same
+scores, and both fit segregation type 11_0 (1:1 nulliplex:simplex).
+Similar for the non-shifted and shifted versions of probe P of marker
+RhK5_10102_270; for that marker the Q probe was rejected.</p>
+</div>
+<div id="exercise-4-combine-probes" class="section level2">
+<h2>Exercise 4: combine probes</h2>
+<p>The Affymetrix Axiom array needs only one probe to detect a SNP. This
+means that the same SNP can be detected by two different probes,
+flanking the SNP on either side. If both probes are present on the array
+they are initially treated as two separate markers by the array software
+and <code>fitPoly</code>. If all is well the two probes should produce
+the same results (since they detect the same SNP) but due to various
+factors a probe may fail entirely or for a subset of the samples.
+Results that are identical between the probes validate each other, and
+missing values from one probe might be filled in by the other. Also,
+<code>fitPoly</code> might produce shifted dosages for one or both
+probes and a comparison might help to decide the correct version.</p>
+<p>In order to compare the results of both probes we use function
+<code>compareProbes</code>. This function assumes that the
+<code>MarkerNames</code> of the two probes for the same SNP are
+identical except for a short suffix; by default (and in the example)
+these suffixes are P and Q.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>cpp <span class="ot">&lt;-</span> <span class="fu">compareProbes</span>(chk, scores, <span class="at">parent1=</span>par1, <span class="at">parent2=</span>par2, <span class="at">F1=</span>F1,</span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>                     <span class="at">polysomic=</span><span class="cn">TRUE</span>, <span class="at">disomic=</span><span class="cn">TRUE</span>, <span class="at">mixed=</span><span class="cn">FALSE</span>,</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>                     <span class="at">ploidy=</span><span class="dv">4</span>, <span class="at">compfile=</span><span class="cn">NA</span>, <span class="at">combscorefile=</span><span class="cn">NA</span>)</span></code></pre></div>
+<pre><code>## batch 1 of 1</code></pre>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">head</span>(cpp<span class="sc">$</span>compstat))</span></code></pre></div>
+<table>
+<colgroup>
+<col width="10%" />
+<col width="6%" />
+<col width="4%" />
+<col width="6%" />
+<col width="4%" />
+<col width="6%" />
+<col width="4%" />
+<col width="6%" />
+<col width="4%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="4%" />
+<col width="4%" />
+<col width="4%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">SNPname</th>
+<th align="left">segtypePn</th>
+<th align="right">qallPn</th>
+<th align="left">segtypePs</th>
+<th align="right">qallPs</th>
+<th align="left">segtypeQn</th>
+<th align="right">qallQn</th>
+<th align="left">segtypeQs</th>
+<th align="right">qallQs</th>
+<th align="left">segtypeRnn</th>
+<th align="left">segtypeRns</th>
+<th align="left">segtypeRsn</th>
+<th align="left">segtypeRss</th>
+<th align="right">countP</th>
+<th align="right">countQ</th>
+<th align="right">countR</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">RhK5_1000_451</td>
+<td align="left">NA</td>
+<td align="right">NA</td>
+<td align="left">NA</td>
+<td align="right">NA</td>
+<td align="left">11_1</td>
+<td align="right">0.1428</td>
+<td align="left">NA</td>
+<td align="right">NA</td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">RhK5_1005_2503</td>
+<td align="left">1331_1</td>
+<td align="right">0.8710</td>
+<td align="left">NA</td>
+<td align="right">NA</td>
+<td align="left">1331_1</td>
+<td align="right">0.4032</td>
+<td align="left">NA</td>
+<td align="right">NA</td>
+<td align="left">1331_1</td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+</tr>
+<tr class="odd">
+<td align="left">RhK5_1007_811</td>
+<td align="left">1551_1</td>
+<td align="right">0.5108</td>
+<td align="left">NA</td>
+<td align="right">NA</td>
+<td align="left">1551_0</td>
+<td align="right">0.5000</td>
+<td align="left">NA</td>
+<td align="right">NA</td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">RhK5_100_3510</td>
+<td align="left">11_0</td>
+<td align="right">1.0000</td>
+<td align="left">NA</td>
+<td align="right">NA</td>
+<td align="left">11_0</td>
+<td align="right">0.8333</td>
+<td align="left">NA</td>
+<td align="right">NA</td>
+<td align="left">11_0</td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+</tr>
+<tr class="odd">
+<td align="left">RhK5_100_531</td>
+<td align="left">141_2</td>
+<td align="right">0.6452</td>
+<td align="left">NA</td>
+<td align="right">NA</td>
+<td align="left">141_2</td>
+<td align="right">0.7742</td>
+<td align="left">NA</td>
+<td align="right">NA</td>
+<td align="left">141_2</td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="right">1</td>
+<td align="right">1</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="left">RhK5_10102_270</td>
+<td align="left">11_2</td>
+<td align="right">0.6845</td>
+<td align="left">11_3</td>
+<td align="right">0.6845</td>
+<td align="left">NA</td>
+<td align="right">NA</td>
+<td align="left">NA</td>
+<td align="right">NA</td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="left">NA</td>
+<td align="right">2</td>
+<td align="right">0</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(cpp<span class="sc">$</span>combscores[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>])</span></code></pre></div>
+<table>
+<colgroup>
+<col width="20%" />
+<col width="8%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="6%" />
+<col width="8%" />
+<col width="8%" />
+<col width="5%" />
+<col width="5%" />
+<col width="5%" />
+<col width="5%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">MarkerName</th>
+<th align="left">segtype</th>
+<th align="right">P540a1</th>
+<th align="right">P867a1</th>
+<th align="right">P867a2</th>
+<th align="right">P867b</th>
+<th align="right">parent1</th>
+<th align="right">parent2</th>
+<th align="right">K001</th>
+<th align="right">K002</th>
+<th align="right">K003</th>
+<th align="right">K004</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">RhK5_1000_451Qn</td>
+<td align="left">11_1</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">2</td>
+<td align="right">1</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="left">RhK5_1005_2503Pn</td>
+<td align="left">1331_1</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">3</td>
+<td align="right">3</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">2</td>
+<td align="right">1</td>
+<td align="right">3</td>
+<td align="right">1</td>
+</tr>
+<tr class="odd">
+<td align="left">RhK5_1005_2503Qn</td>
+<td align="left">1331_1</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">3</td>
+<td align="right">2</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">2</td>
+<td align="right">1</td>
+<td align="right">3</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="left">RhK5_1005_2503Rnn</td>
+<td align="left">1331_1</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">3</td>
+<td align="right">3</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">2</td>
+<td align="right">1</td>
+<td align="right">3</td>
+<td align="right">1</td>
+</tr>
+</tbody>
+</table>
+<p><code>compareProbes</code> returns a list with two components
+<code>compstat</code> and <code>combscores</code>, each a data.frame.
+These are also saved as tab-separated text files if
+<code>compfile</code> and <code>combscorefile</code> are specified.
+Data.frame <code>compstat</code> has an overview of the different
+versions of each SNP (two probes, each unshifted and/or shifted). For
+each of these (suffixed with P or Q for the probe and n or s for
+(non-)shifted) the segregation type and <code>qall_mult</code> quality
+score is listed. If (a version of) the P and the Q probe are
+sufficiently similar, a combined version of the SNP is produced which
+gets the suffix R, and a further suffix <code>nn</code>,
+<code>ns</code>, <code>sn</code> or <code>ss</code> depending on whether
+the nonshifted or the shifted version of the P and Q probe was used for
+merging. Also for such a merged (R) marker the segregation type is
+given, and finally the number of versions of the P, Q and R markers. Two
+probes are considered sufficiently similar to merge if they have the
+same segregation type and if there are (by default) not more than 4%
+conflicting sample scores. For more details and additional parameters
+see the help.</p>
+<p>The other component of the <code>compareProbes</code> result is
+data.frame <code>combscores</code>. This lists the segregation type and
+dosages for all markers (the original P and Q markers and the combined R
+markers) in the same format as produced by <code>writeDosagefile</code>
+(exercise 3). In the second table we can see that there is redundancy:
+for the first SNP the P, Q and R markers are all present, but they are
+almost completely identical (as expected, since a combined marker is
+produced). If we are happy to accept the merging we need to remove the P
+and Q marker data if an R marker is present. This is done by function
+removeRedundant:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a>rr <span class="ot">&lt;-</span> <span class="fu">removeRedundant</span>(<span class="at">compstat=</span>cpp<span class="sc">$</span>compstat, <span class="at">combscores=</span>cpp<span class="sc">$</span>combscores,</span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a>                      <span class="at">compfile=</span><span class="cn">NA</span>, <span class="at">combscorefile=</span><span class="cn">NA</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(rr<span class="sc">$</span>combscores[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>])</span></code></pre></div>
+<table>
+<colgroup>
+<col width="3%" />
+<col width="19%" />
+<col width="8%" />
+<col width="7%" />
+<col width="7%" />
+<col width="7%" />
+<col width="6%" />
+<col width="8%" />
+<col width="8%" />
+<col width="5%" />
+<col width="5%" />
+<col width="5%" />
+<col width="5%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left"></th>
+<th align="left">MarkerName</th>
+<th align="left">segtype</th>
+<th align="right">P540a1</th>
+<th align="right">P867a1</th>
+<th align="right">P867a2</th>
+<th align="right">P867b</th>
+<th align="right">parent1</th>
+<th align="right">parent2</th>
+<th align="right">K001</th>
+<th align="right">K002</th>
+<th align="right">K003</th>
+<th align="right">K004</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">1</td>
+<td align="left">RhK5_1000_451Qn</td>
+<td align="left">11_1</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">0</td>
+<td align="right">3</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">2</td>
+<td align="right">1</td>
+<td align="right">1</td>
+</tr>
+<tr class="even">
+<td align="left">4</td>
+<td align="left">RhK5_1005_2503Rnn</td>
+<td align="left">1331_1</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">3</td>
+<td align="right">3</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">2</td>
+<td align="right">1</td>
+<td align="right">3</td>
+<td align="right">1</td>
+</tr>
+<tr class="odd">
+<td align="left">5</td>
+<td align="left">RhK5_1007_811Pn</td>
+<td align="left">1551_1</td>
+<td align="right">3</td>
+<td align="right">2</td>
+<td align="right">2</td>
+<td align="right">NA</td>
+<td align="right">3</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">2</td>
+<td align="right">3</td>
+<td align="right">2</td>
+</tr>
+<tr class="even">
+<td align="left">6</td>
+<td align="left">RhK5_1007_811Qn</td>
+<td align="left">1551_0</td>
+<td align="right">2</td>
+<td align="right">1</td>
+<td align="right">0</td>
+<td align="right">1</td>
+<td align="right">2</td>
+<td align="right">1</td>
+<td align="right">2</td>
+<td align="right">1</td>
+<td align="right">2</td>
+<td align="right">1</td>
+</tr>
+</tbody>
+</table>
+<p><code>removeRedundant</code> produces the same type of output as
+<code>compareProbes</code>. The <code>compstat</code> data.frame is not
+very interesting but the combined scores in data.frame
+<code>rr$combscores</code> are the result that we will want to use in
+mapping studies and further genetic analyses.</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
